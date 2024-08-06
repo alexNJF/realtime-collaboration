@@ -10,4 +10,17 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'realtimecollabration';
+  private ws!: WebSocket;
+
+  ngOnInit() {
+    this.ws = new WebSocket('ws://your-server-address');
+
+    this.ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      // Update UI based on received data
+    };
+
+    // Handle user interactions and send data to the server
+  }
+
 }
