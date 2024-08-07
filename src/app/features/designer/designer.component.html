@@ -1,0 +1,16 @@
+@if(others(); as other){
+    <button (click)="closeSocket()">close</button>
+    <button (click)="startListening()">start</button>
+    <div class="designer" (mousemove)="sendMessage($event)">   
+        @if(other.data; as data){
+        <div class="pointer"  
+        [ngStyle]="{
+            'top':data.cordination.y+'px',
+            'left':data.cordination.x+'px'
+        }" >
+            <span>{{data.username}}</span>
+            <img width="15px"src="img/pointer.png" alt="">
+        </div>
+    }
+    </div>
+}
