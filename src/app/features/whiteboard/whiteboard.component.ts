@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragMove } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragHandle, CdkDragMove } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { Shape } from '../../core/models/shape.mpdel';
@@ -9,6 +9,7 @@ import { TriangleComponent } from './sidebar/triangle/triangle.component';
 import { DropService } from './sidebar/drop.service';
 import { BoardStatusComponent } from './board-status/board-status.component';
 import { generateUniqueId } from '../../shared/utils/generator';
+import { ResizableDirective } from '../../shared/directives/resizable.directive';
 
 
 
@@ -21,10 +22,13 @@ import { generateUniqueId } from '../../shared/utils/generator';
   imports: [
     CommonModule,
     CdkDrag,
+    CdkDragHandle,
     SidebarComponent,
     SquareComponent,
     TriangleComponent,
-    BoardStatusComponent]
+    BoardStatusComponent,
+    ResizableDirective
+  ]
 })
 export default class WhiteboardComponent implements OnInit {
   readonly shapes = inject(DropService).shapes;
@@ -32,7 +36,7 @@ export default class WhiteboardComponent implements OnInit {
 
   username = input()
   isConnected: boolean = true;
-  item!:any;
+  item!: any;
 
   ngOnInit() {
     this.#wsService.messages$.subscribe((msg) => this.handleIncomingMessage(msg));
@@ -60,8 +64,25 @@ export default class WhiteboardComponent implements OnInit {
   }
 
   onShapeDragMove(event: CdkDragMove<any>, shape: Shape) {
-    this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, x: event.pointerPosition.x, y: event.pointerPosition.y} });
+    this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, x: event.pointerPosition.x, y: event.pointerPosition.y } });
   }
+  resizingShape(event: { status: string, width?: number; height?: number }, shape: Shape) {
+    switch (event.status) {
+      case 'resizing':
+        this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, width: event.width, height: event.height } });
+        break;
+      case 'startResizing':
+        this.#wsService.sendMessage({ action: 'lock', data: { shapeId: shape.id, userId: this.username() } });
+        break;
+      case 'stopResizing':
+        this.#wsService.sendMessage({ action: 'unlock', data: { shapeId: shape.id, userId: this.username() } });
+        break;
+
+      default:
+        break;
+    }
+  }
+
 
   handleIncomingMessage(msg: any) {
     switch (msg.action) {
@@ -87,15 +108,13 @@ export default class WhiteboardComponent implements OnInit {
         }
         break;
       case 'mouseMove':
-        console.log(msg.data.coordination);
-        
-       this.item={...msg.data}
+        this.item = { ...msg.data }
         break;
     }
   }
 
-  ali(event: MouseEvent) {
-    this.#wsService.sendMessage({ action: 'mouseMove', data: { userId: this.username(),coordination:{x:event.x,y:event.y} }});
+  mouseMove(event: MouseEvent) {
+    this.#wsService.sendMessage({ action: 'mouseMove', data: { userId: this.username(), coordination: { x: event.x, y: event.y } } });
   }
 
 }

@@ -11,6 +11,7 @@ import { WebsocketService } from '../../../core/services/websocket.service';
 export class BoardStatusComponent {
   readonly #wsService = inject(WebsocketService);
   isConnected = input(false)
+  username = input.required()
   resetServer(){
     this.#wsService.sendMessage({action:'resetServer'})
   }

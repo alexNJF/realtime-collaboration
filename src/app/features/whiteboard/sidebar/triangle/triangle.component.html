@@ -1,5 +1,11 @@
 <div
-  class="cursor-move w-0 h-0 border-b-gray-600"
+[ngClass]="{
+  'cursor-move':true,
+  'w-0':true,
+  'h-0':true,
+  'border-gray-600': !lock(),  
+  'border-rose-600': lock()  
+}"
   [ngStyle]="{
     'border-left-width': height()/1.5+'px',
     'border-right-width': height()/1.5+'px',
@@ -9,4 +15,7 @@
 
   }"
   style="border-style: solid;"
-></div>
+>
+<ng-content select="[movement]"></ng-content>
+<ng-content select="[resize]"></ng-content>
+</div>

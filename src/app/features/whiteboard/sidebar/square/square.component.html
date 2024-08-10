@@ -1,10 +1,10 @@
 <div 
-  [ngClass]="{
-    'cursor-move': true,
+[ngClass]="{
     'bg-gray-600': !lock(),  
     'bg-rose-600': lock()  
   }"
-  [style.width]="width()+'px'"
-  [style.height]="height()+'px'"
->
+   [style.width]="width()+'px'"
+   [style.height]="height()+'px'">
+  <ng-content select="[movement]"></ng-content>
+  <ng-content select="[resize]"></ng-content>
 </div>
