@@ -5,16 +5,9 @@
  />
   <div class="board" (mousemove)="mouseMove($event)">
   <app-sidebar />
-  <div>
-    <div class="absolute z-30" [ngStyle]="{
-        'top':item?.coordination?.y+'px',
-        'left':item?.coordination?.x+'px'
-       }">
-       <img width="15px" src="img/pointer.png" alt="">
-       <span>{{item?.userId}}</span>
-   </div>
-</div>
-
+ <app-pointer 
+ [pointer]="item"
+ />
 
   @for (shape of shapes(); track $index) {
     @switch (shape.type) {
@@ -41,41 +34,13 @@
           </svg>
         </div>
 
-        <div resize resizable 
+        <div 
+        resizable 
         (sizeChange)="resizingShape($event,shape)"  
         class="h-3 w-3 absolute bottom-0 right-0 bg-blue-500 cursor-nwse-resize"></div>
         </app-square>
       }
-      <!-- @case ('triangle') {
-        <app-triangle 
-        class="absolute"
-        cdkDragBoundary=".board"
-        cdkDrag
-        [width]="shape.width "
-        [height]="shape.height  "
-        [lock]="!!(shape.lockedBy && shape.lockedBy !== username())"
-        [ngStyle]="{ 
-          top: shape.y + 'px',
-          left: shape.x + 'px',
-        }"
-        (cdkDragStarted)="onShapeDragStart(shape.id)"
-        (cdkDragEnded)="onShapeDragEnd($event, shape.id)"
-        (cdkDragMoved)="onShapeDragMove($event, shape)"
-        >
-        <div class="cursor-move absolute left-0 top-0" movement cdkDragHandle>
-          <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
-            <path d="M0 0h24v24H0z" fill="none"></path>
-          </svg>
-        </div>
-
-        <div resize resizable 
-        (sizeChange)="resizingShape($event,shape)"  
-        class="h-3 w-3 absolute bottom-0 right-0 bg-blue-500 cursor-nwse-resize"></div>
-        </app-triangle>
-      } -->
     }
   }
 </div>
 
-<!-- [class.locked]="shape.lockedBy && shape.lockedBy !== username()" -->

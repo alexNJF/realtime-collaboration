@@ -1,0 +1,7 @@
+<div class="absolute z-20" [ngStyle]="{
+        'top':pointer()?.coordination?.y+'px',
+        'left':pointer()?.coordination?.x+'px'
+       }">
+    <img width="15px" src="img/pointer.png" alt="">
+    <span>{{pointer()?.userId}}</span>
+</div>

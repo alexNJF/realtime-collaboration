@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { Subject, Observable, of } from 'rxjs';
 import { retryWhen, delay, tap, switchMap } from 'rxjs/operators';
+import { WEB_SOCKET_URL } from '../configs/websocket.config';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class WebsocketService {
   }
 
   private connect() {
-    this.socket$ = webSocket('ws://localhost:8080');
+    this.socket$ = webSocket(WEB_SOCKET_URL);
 
     this.socket$.pipe(
       retryWhen((errors) =>
@@ -39,7 +40,9 @@ export class WebsocketService {
       )
     ).subscribe(
       (message) => {
-        console.log('Received message: ', message);
+        if(message.action==='updateShape'){
+          console.log('Received message: ', message.data);
+        }
         this.connectionStatus$.next(true);
       },
       (error) => {

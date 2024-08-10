@@ -10,6 +10,7 @@ import { DropService } from './sidebar/drop.service';
 import { BoardStatusComponent } from './board-status/board-status.component';
 import { generateUniqueId } from '../../shared/utils/generator';
 import { ResizableDirective } from '../../shared/directives/resizable.directive';
+import { PointerComponent } from './pointer/pointer.component';
 
 
 
@@ -27,7 +28,8 @@ import { ResizableDirective } from '../../shared/directives/resizable.directive'
     SquareComponent,
     TriangleComponent,
     BoardStatusComponent,
-    ResizableDirective
+    ResizableDirective,
+    PointerComponent
   ]
 })
 export default class WhiteboardComponent implements OnInit {

@@ -42,8 +42,8 @@ wss.on('connection', (ws) => {
         break;
       case 'resetServer':
         shapes=[];
-        locks={};
         users=[];
+        locks={};
           broadcastToAll({ action: 'resetServer'});
         break;
     }
