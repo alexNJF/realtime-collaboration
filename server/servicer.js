@@ -13,6 +13,11 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     const msg = JSON.parse(message);
     switch (msg.action) {
+      case 'memberChange':
+          users.push(msg.data.userId);
+          ws['userId']=msg.data.userId
+          broadcastToAll({ action: 'memberChange', data: { users:users } });
+        break;
       case 'lock':
         if (!locks[msg.data.shapeId]) {
           locks[msg.data.shapeId] = msg.data.userId;
@@ -57,6 +62,9 @@ wss.on('connection', (ws) => {
         delete locks[shapeId];
       }
     });
+    users=users.filter(user=>user !==ws.userId)
+    broadcastToAll({ action: 'memberChange', data: { users:users } });
+
   });
 
   // Send initial state to the new client

@@ -39,12 +39,14 @@ export default class WhiteboardComponent implements OnInit {
   username = input()
   isConnected: boolean = true;
   item!: any;
+  members: string[]=[];
 
   ngOnInit() {
     this.#wsService.messages$.subscribe((msg) => this.handleIncomingMessage(msg));
     this.#wsService.connectionStatus.subscribe((status) => {
       this.isConnected = status;
     });
+    this.#wsService.sendMessage({action:'memberChange',data: {userId: this.username()}})
   }
 
   onShapeDragStart(shapeId: string) {
@@ -111,6 +113,9 @@ export default class WhiteboardComponent implements OnInit {
         break;
       case 'mouseMove':
         this.item = { ...msg.data }
+        break;
+      case 'memberChange':   
+        this.members = msg.data.users
         break;
     }
   }

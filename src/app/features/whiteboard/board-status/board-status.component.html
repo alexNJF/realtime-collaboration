@@ -12,6 +12,10 @@
         <button class="bg-red-300" (click)="resetServer()">reset server</button>
     </div>
     <div>
-        board Participate
+        @for (member of members(); track $index) {
+            <span class="px-2">
+                {{member}}
+            </span>
+        }
     </div>
 </div>

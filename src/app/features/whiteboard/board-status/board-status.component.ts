@@ -12,6 +12,7 @@ export class BoardStatusComponent {
   readonly #wsService = inject(WebsocketService);
   isConnected = input(false)
   username = input.required()
+  members = input.required<string[]>()
   resetServer(){
     this.#wsService.sendMessage({action:'resetServer'})
   }
