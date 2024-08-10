@@ -10,5 +10,10 @@ export const routes: Routes = [
         path: 'designer/:username',
         loadComponent: async () =>
             await import('./features/designer/designer.component')
+    },
+    {
+        path: 'whiteboard/:username',
+        loadComponent: async () =>
+            await import('./features/whiteboard/whiteboard.component')
     }
 ];

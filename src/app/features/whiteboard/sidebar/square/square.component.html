@@ -1,0 +1,10 @@
+<div 
+  [ngClass]="{
+    'cursor-move': true,
+    'bg-gray-600': !lock(),  
+    'bg-rose-600': lock()  
+  }"
+  [style.width]="width()+'px'"
+  [style.height]="height()+'px'"
+>
+</div>

@@ -1,0 +1,55 @@
+
+<app-board-status [isConnected]="isConnected" />
+  <div class="board" (mousemove)="ali($event)">
+  <app-sidebar />
+  <div>
+    <div class="absolute" [ngStyle]="{
+        'top':item?.coordination?.y+'px',
+        'left':item?.coordination?.x+'px'
+       }">
+       <span>{{item?.userId}}</span>
+       <img width="15px" src="img/pointer.png" alt="">
+   </div>
+</div>
+
+
+  @for (shape of shapes(); track $index) {
+    @switch (shape.type) {
+      @case ('square') {
+        <app-square 
+        class="absolute"
+        cdkDragBoundary=".board"
+        cdkDrag
+        [width]="shape.width "
+        [height]="shape.height "
+        [lock]="!!(shape.lockedBy && shape.lockedBy !== username())"
+        [ngStyle]="{ 
+          top: shape.y + 'px',
+          left: shape.x + 'px',
+        }"
+        (cdkDragStarted)="onShapeDragStart(shape.id)"
+        (cdkDragEnded)="onShapeDragEnd($event, shape.id)"
+        (cdkDragMoved)="onShapeDragMove($event, shape)"
+        />
+      }
+      @case ('triangle') {
+        <app-triangle 
+        class="absolute"
+        cdkDragBoundary=".board"
+        cdkDrag
+        [width]="shape.width "
+        [height]="shape.height  "
+        [ngStyle]="{ 
+          top: shape.y + 'px',
+          left: shape.x + 'px',
+        }"
+        (cdkDragStarted)="onShapeDragStart(shape.id)"
+        (cdkDragEnded)="onShapeDragEnd($event, shape.id)"
+        (cdkDragMoved)="onShapeDragMove($event, shape)"
+        />
+      }
+    }
+  }
+</div>
+
+<!-- [class.locked]="shape.lockedBy && shape.lockedBy !== username()" -->

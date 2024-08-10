@@ -1,0 +1,16 @@
+<div class="flex justify-between items-center p-3">
+    <div>
+        @if (isConnected()) {
+        <p class="text-green-600">Board Connected</p>
+
+        }@else {
+        <p class="text-red-400">Connection lost. Attempting to reconnect...</p>
+        }
+    </div>
+    <div>
+        <button (click)="resetServer()">reset server</button>
+    </div>
+    <div>
+        board Participate
+    </div>
+</div>

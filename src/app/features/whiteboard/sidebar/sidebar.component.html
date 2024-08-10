@@ -1,0 +1,11 @@
+<div class="absolute top-[30vh] left-[5px] z-10 shadow-lg">
+    <div class="h-fit w-[70px] bg-white rounded-xl">
+        <div cdkDropList cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)"
+            class="flex flex-col gap-4 py-4 items-center justify-center">
+            <!-- Square -->
+            <app-square square cdkDrag />
+            <!-- Triangle -->
+            <app-triangle triangle cdkDrag />
+        </div>
+    </div>
+</div>

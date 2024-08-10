@@ -1,16 +1,25 @@
+<app-sidebar/>
 @if(others(); as other){
-    <button (click)="closeSocket()">close</button>
-    <button (click)="startListening()">start</button>
-    <div class="designer" (mousemove)="sendMessage($event)">   
-        @if(other.data; as data){
-        <div class="pointer"  
-        [ngStyle]="{
-            'top':data.cordination.y+'px',
-            'left':data.cordination.x+'px'
-        }" >
-            <span>{{data.username}}</span>
-            <img width="15px"src="img/pointer.png" alt="">
-        </div>
+<button (click)="closeSocket()">close</button>
+<button (click)="startListening()">start</button>
+<div class="designer" (mousemove)="sendMessage($event)">
+    @if(other.data; as data){
+    <!-- {{data|json}} -->
+     @for (item of data | keyvalue:sortByValueAsc; track $index) {
+         <span>{{item.key}}</span>
+         @if (item.key!==username()) {
+             <div>
+                 <div class="pointer" [ngStyle]="{
+                     'top':item.value.cordination.y+'px',
+                     'left':item.value.cordination.x+'px'
+                    }">
+                    <span>{{item.key}}</span>
+                    <img width="15px" src="img/pointer.png" alt="">
+                </div>
+            </div>
+        }
     }
-    </div>
+}
+    <app-draggable-div (elementChangeing)="elementChangeing($event)" [isLock]="false"/>
+</div>
 }
