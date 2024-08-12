@@ -1,5 +1,5 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { SocketAction } from '../../../core/enums/socket-status.enum';
 
@@ -13,7 +13,8 @@ import { SocketAction } from '../../../core/enums/socket-status.enum';
 export class BoardStatusComponent {
   readonly #wsService = inject(WebSocketService);
   retryStatus=this.#wsService.retryStatus;
-  isConnected = input(false)
+  connectionStatus=this.#wsService.connectionStatus;
+  isConnected =signal(false)
   username = input.required()
   members = input.required<string[]>()
   

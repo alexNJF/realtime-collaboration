@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center p-3">
     <div class="flex items-center justify-center">
-        @if (isConnected()) {
+        @if (connectionStatus()) {
             <img width="25px" class="mx-2 cursor-pointer"  (click)="resetServer()"src="img/reset.png" alt="">
         <p class="text-green-600 font-bold">Board Connected</p>
 

@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragEnd, CdkDragHandle, CdkDragMove } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd, CdkDragHandle, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { WebSocketService } from '../../core/services/websocket.service';
@@ -11,6 +11,7 @@ import { SquareComponent } from './sidebar/square/square.component';
 import { TriangleComponent } from './sidebar/triangle/triangle.component';
 import { SocketAction } from '../../core/enums/socket-status.enum';
 import { ResizingStatus } from '../../core/enums/resizing-status.enum';
+import { WhiteboardService } from './services/whiteboard.service';
 
 
 
@@ -30,54 +31,44 @@ import { ResizingStatus } from '../../core/enums/resizing-status.enum';
     BoardStatusComponent,
     ResizableDirective,
     PointerComponent
-  ]
+  ],
+  providers:[WhiteboardService]
 })
 export default class WhiteboardComponent implements OnInit {
   username = input.required<string>()
   readonly shapes = inject(DropService).shapes;
   readonly #wsService = inject(WebSocketService);
-
-
-  isConnected: boolean = true;
-  item!: any;
-  members: string[] = [];
-
+  readonly #whiteboardService = inject(WhiteboardService);
+  readonly otherUserPointer =this.#whiteboardService.pointer;
+  readonly members =this.#whiteboardService.members;
+  
 
   ngOnInit() {
-    this.#wsService.messages$.subscribe((msg) => this.handleIncomingMessage(msg));
-    this.#wsService.connectionStatus$.subscribe((status) => {
-      this.isConnected = status;
-    });
-    this.#wsService.sendMessage({ action: SocketAction.MEMBER_CHANGE, data: { userId: this.username() } })
+    this.#whiteboardService.joinUser(this.username())
   }
 
-  onShapeDragStart(shapeId: string) {
-    const shape = this.shapes().find((s) => s.id === shapeId);
-    if (shape && !shape.lockedBy) {
-      this.#wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: this.username() } });
-    }
+  onShapeDragStart(event:CdkDragStart,shapeId: string) {
+    this.#whiteboardService.shapeStartDragging(
+      event,
+      shapeId,
+      this.username()
+    )
   }
 
   onShapeDragEnd(event: CdkDragEnd<any>, shapeId: string) {
-    const shape = this.shapes().find((s) => s.id === shapeId);
-    if (shape && shape.lockedBy === this.username()) {
-
-      shape.x = event.source.getFreeDragPosition().x;
-      shape.y = event.source.getFreeDragPosition().y;
-      console.log(shape);
-
-
-      this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
-      this.#wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: this.username() } });
-    }
+    this.#whiteboardService.shapeStopDragging(
+      event,
+      shapeId,
+      this.username()
+    )
   }
 
   onShapeDragMove(event: CdkDragMove<any>, shapeId: string) {
-    const shape = this.shapes().find((s) => s.id === shapeId);
-    const x = event.source.getFreeDragPosition().x
-    const y = event.source.getFreeDragPosition().y
-
-    this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: { ...shape, x, y } });
+    this.#whiteboardService.shapeDragging(
+      event,
+      shapeId,
+      this.username()
+    )
   }
   resizingShape(event: { status: ResizingStatus, width?: number; height?: number }, shapeId: string) {
     switch (event.status) {
@@ -101,47 +92,8 @@ export default class WhiteboardComponent implements OnInit {
     }
   }
 
-
-  handleIncomingMessage(msg: any) {
-    switch (msg.action) {
-      case SocketAction.LOCK:
-        const shapeToLock = this.shapes().find((s) => s.id === msg.data.shapeId);
-        if (shapeToLock) {
-          shapeToLock.lockedBy = msg.data.userId;
-        }
-        break;
-      case SocketAction.UNLOCK:
-        const shapeToUnlock = this.shapes().find((s) => s.id === msg.data.shapeId);
-        if (shapeToUnlock && shapeToUnlock.lockedBy === msg.data.userId) {
-          shapeToUnlock.lockedBy = undefined;
-        }
-        break;
-      case SocketAction.UPDATE_SHAPE:
-        const shapeToUpdate = this.shapes().find((s) => s.id === msg.data.id);
-        if (shapeToUpdate) {
-          shapeToUpdate.x = msg.data.x;
-          shapeToUpdate.y = msg.data.y;
-          shapeToUpdate.width = msg.data.width;
-          shapeToUpdate.height = msg.data.height;
-        }
-        break;
-      case SocketAction.MOUSE_MOVE:
-        this.item = { ...msg.data }
-        break;
-      case SocketAction.MEMBER_CHANGE:
-        this.members = msg.data.users
-        break;
-    }
-  }
-
   mouseMove(event: MouseEvent) {
-    this.#wsService.sendMessage({
-      action: SocketAction.MOUSE_MOVE,
-      data: {
-        userId: this.username(),
-        coordination: { x: event.x, y: event.y }
-      }
-    });
+    this.#whiteboardService.mouseMove(event,this.username())
   }
 
 }

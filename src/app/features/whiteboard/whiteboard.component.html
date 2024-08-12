@@ -1,13 +1,12 @@
 
 <app-board-status
- [isConnected]="isConnected"
  [username]="username()"
- [members]="members"
+ [members]="members()"
  />
   <div class="board" (mousemove)="mouseMove($event)">
   <app-sidebar />
  <app-pointer 
- [pointer]="item"
+ [pointer]="otherUserPointer()"
  />
 
   @for (shape of shapes(); track $index) {
@@ -21,7 +20,7 @@
         [height]="shape.height "
         [lock]="!!(shape.lockedBy && shape.lockedBy !== username())"
         [cdkDragFreeDragPosition]="{x:shape.x,y:shape.y}"
-        (cdkDragStarted)="onShapeDragStart(shape.id)"
+        (cdkDragStarted)="onShapeDragStart($event,shape.id)"
         (cdkDragEnded)="onShapeDragEnd($event, shape.id)"
         (cdkDragMoved)="onShapeDragMove($event, shape.id)"
         >

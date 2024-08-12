@@ -10,9 +10,10 @@ import { WebSocketDataModel } from '../models/socket.model';
 })
 export class WebSocketService {
   private socket$!: WebSocketSubject<WebSocketDataModel>;
-  private connectionStatusSubject: Subject<boolean> = new Subject<boolean>();
+  // private connectionStatusSubject: Subject<boolean> = new Subject<boolean>();
   private readonly maxReconnectAttempts = 5;
   private reconnectAttemptsCounter = signal(0);
+  connectionStatus = signal(false);
 
   retryStatus = computed(() => {
     const attempts = this.reconnectAttemptsCounter();
@@ -45,11 +46,13 @@ export class WebSocketService {
   private handleRetry(error: any, retryCount: number): Observable<number> {
     this.reconnectAttemptsCounter.update((count) => count + 1);
     console.log(`Reconnecting... (${this.reconnectAttemptsCounter()})`);
-    this.connectionStatusSubject.next(false);
-
+    // this.connectionStatusSubject.next(false);
+    this.connectionStatus.set(false)
+    
     if (this.reconnectAttemptsCounter() >= this.maxReconnectAttempts) {
       console.error('Maximum reconnect attempts reached');
-      this.connectionStatusSubject.next(false);
+      // this.connectionStatusSubject.next(false);
+      this.connectionStatus.set(false)
       throw error; // Stop retrying after max attempts
     }
 
@@ -60,7 +63,8 @@ export class WebSocketService {
     if (message.action === 'updateShape') {
       console.log('Received message: ', message.data);
     }
-    this.connectionStatusSubject.next(true);
+    // this.connectionStatusSubject.next(true);
+    this.connectionStatus.set(true)
     this.reconnectAttemptsCounter.set(0);
   }
 
@@ -80,7 +84,7 @@ export class WebSocketService {
     return this.socket$.asObservable();
   }
 
-  get connectionStatus$(): Observable<boolean> {
-    return this.connectionStatusSubject.asObservable();
-  }
+  // get connectionStatus$(): Observable<boolean> {
+  //   return this.connectionStatusSubject.asObservable();
+  // }
 }
