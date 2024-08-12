@@ -1,6 +1,7 @@
 import { TitleCasePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { WebSocketService } from '../../../core/services/websocket.service';
+import { SocketAction } from '../../../core/enums/socket-status.enum';
 
 @Component({
   selector: 'app-board-status',
@@ -17,6 +18,6 @@ export class BoardStatusComponent {
   members = input.required<string[]>()
   
   resetServer():void{
-    this.#wsService.sendMessage({action:'resetServer'})
+    this.#wsService.sendMessage({action:SocketAction.RESET_SERVER})
   }
 }

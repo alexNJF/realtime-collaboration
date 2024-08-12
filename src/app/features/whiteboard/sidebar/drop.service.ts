@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Shape } from '../../../core/models/shape.mpdel';
 import { generateUniqueId } from '../../../shared/utils/generator';
 import { WebSocketService } from '../../../core/services/websocket.service';
+import { SocketAction } from '../../../core/enums/socket-status.enum';
 
 @Injectable({ providedIn: 'root' })
 export class DropService {
@@ -27,19 +28,19 @@ export class DropService {
             shapes.push(shape)
             return shapes;
         })
-        this.#wsService.sendMessage({ action: 'addShape', data: shape })
+        this.#wsService.sendMessage({ action: SocketAction.ADD_SHAPE, data: shape })
     }
     
     checkForInitialState():void{
         this.#wsService.messages$.subscribe(msg=>{
-            if(msg.action==='initialStateUpdate'){                
+            if(msg.action===SocketAction.INITIAL_STATE_UPDATE){                
                 this.shapes.set(msg.data.shapes)
             }
         })
     }
     checkForAddShape():void{
         this.#wsService.messages$.subscribe(msg=>{
-            if(msg.action==='addShape'){                
+            if(msg.action===SocketAction.ADD_SHAPE){                
                 this.shapes.update((shapes)=>{
                     shapes.push(msg.data)
                     return shapes;

@@ -1,4 +1,6 @@
+import { SocketAction } from "../enums/socket-status.enum";
+
 export interface WebSocketDataModel {
-    action:string;
+    action:SocketAction;
     data?:any;
 }
