@@ -50,8 +50,11 @@ wss.on('connection', (ws) => {
       case 'resetServer':
         shapes=[];
         users=[];
-     
           broadcastToAll({ action: 'resetServer'});
+        break;
+
+        case 'broadCast':
+          broadcastToAll({ action: 'broadCast', data: msg.data },ws);
         break;
     }
   });

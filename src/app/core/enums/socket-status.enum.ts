@@ -7,5 +7,6 @@ export enum SocketAction{
     MOUSE_MOVE='mouseMove',
     RESET_SERVER='resetServer',
     INITIAL_STATE_UPDATE='initialStateUpdate',
+    BROAD_CAST='broadCast',
 
 }
