@@ -10,6 +10,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { SquareComponent } from './sidebar/square/square.component';
 import { TriangleComponent } from './sidebar/triangle/triangle.component';
 import { SocketAction } from '../../core/enums/socket-status.enum';
+import { ResizingStatus } from '../../core/enums/resizing-status.enum';
 
 
 
@@ -78,9 +79,9 @@ export default class WhiteboardComponent implements OnInit {
 
     this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: { ...shape, x, y } });
   }
-  resizingShape(event: { status: string, width?: number; height?: number }, shapeId: string) {
+  resizingShape(event: { status: ResizingStatus, width?: number; height?: number }, shapeId: string) {
     switch (event.status) {
-      case 'resizing':
+      case ResizingStatus.RESIZING:
         const shape = this.shapes().find((s) => s.id === shapeId);
         if (shape) {
           shape.width = event.width!,
@@ -88,10 +89,10 @@ export default class WhiteboardComponent implements OnInit {
           this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
         }
         break;
-      case 'startResizing':
+      case ResizingStatus.START_RESIZING:
         this.#wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: this.username() } });
         break;
-      case 'stopResizing':
+      case ResizingStatus.STOP_RESIZING:
         this.#wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: this.username() } });
         break;
 

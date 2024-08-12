@@ -1,11 +1,12 @@
 import { Directive, ElementRef, Renderer2, HostListener, Output, EventEmitter } from '@angular/core';
+import { ResizingStatus } from '../../core/enums/resizing-status.enum';
 
 @Directive({
     standalone: true,
     selector: '[resizable]'
 })
 export class ResizableDirective {
-    @Output() sizeChange = new EventEmitter<{status:string, width?: number; height?: number }>();
+    @Output() sizeChange = new EventEmitter<{status:ResizingStatus, width?: number; height?: number }>();
 
     private resizing = false;
     private startWidth = 0;
@@ -28,7 +29,7 @@ export class ResizableDirective {
 
             event.preventDefault();
             event.stopPropagation();
-            this.sizeChange.emit({status:'startResizing'});
+            this.sizeChange.emit({status:ResizingStatus.START_RESIZING});
         }
     }
 
@@ -49,13 +50,13 @@ export class ResizableDirective {
         this.renderer.setStyle(parent, 'height', `${newHeight}px`);
 
         // Emit new size during resizing        
-        this.sizeChange.emit({status:'resizing', width: newWidth, height: newHeight });
+        this.sizeChange.emit({status:ResizingStatus.RESIZING, width: newWidth, height: newHeight });
     }
 
     @HostListener('document:mouseup')
     onMouseUp(): void {
         this.resizing = false;
-        this.sizeChange.emit({status:'stopResizing'});
+        this.sizeChange.emit({status:ResizingStatus.STOP_RESIZING});
 
     }
 
