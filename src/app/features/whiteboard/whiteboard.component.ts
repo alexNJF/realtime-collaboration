@@ -62,9 +62,9 @@ export default class WhiteboardComponent implements OnInit {
     const shape = this.shapes().find((s) => s.id === shapeId);
     if (shape && shape.lockedBy === this.username()) {
 
-      shape.x = event.source.getFreeDragPosition().x,
-        shape.y = event.source.getFreeDragPosition().y,
-        console.log(shape);
+      shape.x = event.source.getFreeDragPosition().x;
+      shape.y = event.source.getFreeDragPosition().y;
+      console.log(shape);
 
 
       this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
@@ -135,7 +135,13 @@ export default class WhiteboardComponent implements OnInit {
   }
 
   mouseMove(event: MouseEvent) {
-    this.#wsService.sendMessage({ action: SocketAction.MOUSE_MOVE, data: { userId: this.username(), coordination: { x: event.x, y: event.y } } });
+    this.#wsService.sendMessage({
+      action: SocketAction.MOUSE_MOVE,
+      data: {
+        userId: this.username(),
+        coordination: { x: event.x, y: event.y }
+      }
+    });
   }
 
 }

@@ -5,10 +5,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 let shapes = [];
 let users = [];
 
-let locks = {};
-
 wss.on('connection', (ws) => {
-  console.log('Client connected');
   
   ws.on('message', (message) => {
     const msg = JSON.parse(message);
@@ -19,18 +16,22 @@ wss.on('connection', (ws) => {
         console.log('Client join',msg.data.userId);
         broadcastToAll({ action: 'memberChange', data: { users:users } });
         break;
+
       case 'lock':
-        if (!locks[msg.data.shapeId]) {
-          locks[msg.data.shapeId] = msg.data.userId;
+          const lockeShapeIndex = shapes.findIndex((s) => s.id === msg.data.shapeId);
+          if (lockeShapeIndex !== -1) {
+            shapes[lockeShapeIndex].lockedBy=msg.data.userId           
           broadcastToAll({ action: 'lock', data: { shapeId: msg.data.shapeId, userId: msg.data.userId } });
-        }
+          }
         break;
       case 'unlock':
-        if (locks[msg.data.shapeId] === msg.data.userId) {
-          delete locks[msg.data.shapeId];
+          const unlockShapeIndex = shapes.findIndex((s) => s.id === msg.data.shapeId);
+          if (unlockShapeIndex !== -1) {
+            shapes[unlockShapeIndex].lockedBy=undefined       
           broadcastToAll({ action: 'unlock', data: { shapeId: msg.data.shapeId,userId: msg.data.userId } });
         }
         break;
+
       case 'updateShape':
         const shapeIndex = shapes.findIndex((s) => s.id === msg.data.id);
         if (shapeIndex !== -1) {
@@ -38,18 +39,18 @@ wss.on('connection', (ws) => {
           broadcastToOther({ action: 'updateShape', data: msg.data },ws);
         }
         break;
+
       case 'addShape':
           shapes.push(msg.data);
           broadcastToOther({ action: 'addShape', data: msg.data },ws);
         break;
       case 'mouseMove':
-          shapes.push(msg.data);
           broadcastToOther({ action: 'mouseMove', data: msg.data },ws);
         break;
       case 'resetServer':
         shapes=[];
         users=[];
-        locks={};
+     
           broadcastToAll({ action: 'resetServer'});
         break;
     }
@@ -57,18 +58,14 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     console.log('Client disconnected', ws.userId);
-    // Release locks held by this user
-    Object.keys(locks).forEach((shapeId) => {
-      if (locks[shapeId] === ws.userId) {
-        delete locks[shapeId];
-      }
-    });
+    
     users=users.filter(user=>user !==ws.userId)
     broadcastToAll({ action: 'memberChange', data: { users:users } });
 
   });
 
   // Send initial state to the new client
+
   ws.send(JSON.stringify({ action: 'initialStateUpdate', data: { shapes } }));
 });
 
