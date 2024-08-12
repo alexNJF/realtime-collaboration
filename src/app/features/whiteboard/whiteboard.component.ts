@@ -12,6 +12,7 @@ import { TriangleComponent } from './sidebar/triangle/triangle.component';
 import { SocketAction } from '../../core/enums/socket-status.enum';
 import { ResizingStatus } from '../../core/enums/resizing-status.enum';
 import { WhiteboardService } from './services/whiteboard.service';
+import { ResizingModel } from '../../core/models/resizing.model';
 
 
 
@@ -32,22 +33,22 @@ import { WhiteboardService } from './services/whiteboard.service';
     ResizableDirective,
     PointerComponent
   ],
-  providers:[WhiteboardService]
+  providers: [WhiteboardService]
 })
 export default class WhiteboardComponent implements OnInit {
   username = input.required<string>()
   readonly shapes = inject(DropService).shapes;
   readonly #wsService = inject(WebSocketService);
   readonly #whiteboardService = inject(WhiteboardService);
-  readonly otherUserPointer =this.#whiteboardService.pointer;
-  readonly members =this.#whiteboardService.members;
-  
+  readonly otherUserPointer = this.#whiteboardService.pointer;
+  readonly members = this.#whiteboardService.members;
+
 
   ngOnInit() {
     this.#whiteboardService.joinUser(this.username())
   }
 
-  onShapeDragStart(event:CdkDragStart,shapeId: string) {
+  onShapeDragStart(event: CdkDragStart, shapeId: string) {
     this.#whiteboardService.shapeStartDragging(
       event,
       shapeId,
@@ -70,30 +71,15 @@ export default class WhiteboardComponent implements OnInit {
       this.username()
     )
   }
-  resizingShape(event: { status: ResizingStatus, width?: number; height?: number }, shapeId: string) {
-    switch (event.status) {
-      case ResizingStatus.RESIZING:
-        const shape = this.shapes().find((s) => s.id === shapeId);
-        if (shape) {
-          shape.width = event.width!,
-            shape.height = event.height!
-          this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
-        }
-        break;
-      case ResizingStatus.START_RESIZING:
-        this.#wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: this.username() } });
-        break;
-      case ResizingStatus.STOP_RESIZING:
-        this.#wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: this.username() } });
-        break;
-
-      default:
-        break;
-    }
+  resizingShape(event: ResizingModel, shapeId: string) {
+    this.#whiteboardService.handelResizing(
+      event,
+      shapeId,
+      this.username()
+    )
   }
-
   mouseMove(event: MouseEvent) {
-    this.#whiteboardService.mouseMove(event,this.username())
+    this.#whiteboardService.mouseMove(event, this.username())
   }
 
 }

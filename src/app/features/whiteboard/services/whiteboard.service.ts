@@ -6,6 +6,8 @@ import { WebSocketDataModel } from '../../../core/models/socket.model';
 import { PointerPositionModel } from '../../../core/models/pointer.model';
 import { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { Shape } from '../../../core/models/shape.mpdel';
+import { ResizingModel } from '../../../core/models/resizing.model';
+import { ResizingStatus } from '../../../core/enums/resizing-status.enum';
 
 @Injectable()
 export class WhiteboardService {
@@ -109,6 +111,28 @@ export class WhiteboardService {
             });
         }
     }
+    
+    handelResizing(event: ResizingModel, shapeId: string, username: string): void {
+        switch (event.status) {
+            case ResizingStatus.RESIZING:
+                const shape = this.shapes().find((s) => s.id === shapeId);
+                if (shape) {
+                    shape.width = event.width!,
+                        shape.height = event.height!
+                    this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+                }
+                break;
+            case ResizingStatus.START_RESIZING:
+                this.#wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
+                break;
+            case ResizingStatus.STOP_RESIZING:
+                this.#wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
+                break;
+            default:
+                break;
+        }
+    }
+
 
     // A utility function to find a shape by its ID
     private findShapeById(shapeId: string): Shape | undefined {
@@ -124,6 +148,4 @@ export class WhiteboardService {
         }): { x: number, y: number } {
         return event.source.getFreeDragPosition();
     }
-
-
 }

@@ -1,12 +1,13 @@
 import { Directive, ElementRef, Renderer2, HostListener, Output, EventEmitter } from '@angular/core';
 import { ResizingStatus } from '../../core/enums/resizing-status.enum';
+import { ResizingModel } from '../../core/models/resizing.model';
 
 @Directive({
     standalone: true,
     selector: '[resizable]'
 })
 export class ResizableDirective {
-    @Output() sizeChange = new EventEmitter<{status:ResizingStatus, width?: number; height?: number }>();
+    @Output() sizeChange = new EventEmitter<ResizingModel>();
 
     private resizing = false;
     private startWidth = 0;
