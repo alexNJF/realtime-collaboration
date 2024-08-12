@@ -1,16 +1,14 @@
-import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragHandle, CdkDragMove } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd, CdkDragHandle, CdkDragMove } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
-import { Shape } from '../../core/models/shape.mpdel';
-import { WebsocketService } from '../../core/services/websocket.service';
+import { WebSocketService } from '../../core/services/websocket.service';
+import { ResizableDirective } from '../../shared/directives/resizable.directive';
+import { BoardStatusComponent } from './board-status/board-status.component';
+import { PointerComponent } from './pointer/pointer.component';
+import { DropService } from './sidebar/drop.service';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SquareComponent } from './sidebar/square/square.component';
 import { TriangleComponent } from './sidebar/triangle/triangle.component';
-import { DropService } from './sidebar/drop.service';
-import { BoardStatusComponent } from './board-status/board-status.component';
-import { generateUniqueId } from '../../shared/utils/generator';
-import { ResizableDirective } from '../../shared/directives/resizable.directive';
-import { PointerComponent } from './pointer/pointer.component';
 
 
 
@@ -34,7 +32,7 @@ import { PointerComponent } from './pointer/pointer.component';
 })
 export default class WhiteboardComponent implements OnInit {
   readonly shapes = inject(DropService).shapes;
-  readonly #wsService = inject(WebsocketService);
+  readonly #wsService = inject(WebSocketService);
 
   username = input()
   isConnected: boolean = true;
@@ -43,7 +41,7 @@ export default class WhiteboardComponent implements OnInit {
 
   ngOnInit() {
     this.#wsService.messages$.subscribe((msg) => this.handleIncomingMessage(msg));
-    this.#wsService.connectionStatus.subscribe((status) => {
+    this.#wsService.connectionStatus$.subscribe((status) => {
       this.isConnected = status;
     });
     this.#wsService.sendMessage({action:'memberChange',data: {userId: this.username()}})
@@ -60,26 +58,38 @@ export default class WhiteboardComponent implements OnInit {
     const shape = this.shapes().find((s) => s.id === shapeId);
     if (shape && shape.lockedBy === this.username()) {
 
-      // shape.x = event.dropPoint.x;
-      // shape.y = event.dropPoint.y;      
-      // this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, x: event.dropPoint.x, y: event.dropPoint.y } });
+      shape.x= event.source.getFreeDragPosition().x,
+      shape.y= event.source.getFreeDragPosition().y,
+      console.log(shape);
+      
+        
+      this.#wsService.sendMessage({ action: 'updateShape', data: shape} );
       this.#wsService.sendMessage({ action: 'unlock', data: { shapeId, userId: this.username() } });
     }
   }
+  
+  onShapeDragMove(event: CdkDragMove<any>, shapeId: string) {
+    const shape = this.shapes().find((s) => s.id === shapeId);
+    const x=event.source.getFreeDragPosition().x
+    const y=event.source.getFreeDragPosition().y
 
-  onShapeDragMove(event: CdkDragMove<any>, shape: Shape) {
-    this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, x: event.pointerPosition.x, y: event.pointerPosition.y } });
+    this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, x, y } });
   }
-  resizingShape(event: { status: string, width?: number; height?: number }, shape: Shape) {
+  resizingShape(event: { status: string, width?: number; height?: number }, shapeId: string) {
     switch (event.status) {
       case 'resizing':
-        this.#wsService.sendMessage({ action: 'updateShape', data: { ...shape, width: event.width, height: event.height } });
+        const shape = this.shapes().find((s) => s.id === shapeId);
+        if(shape){
+          shape.width=event.width!,
+          shape.height=event.height!
+          this.#wsService.sendMessage({ action: 'updateShape', data: shape });
+        }
         break;
       case 'startResizing':
-        this.#wsService.sendMessage({ action: 'lock', data: { shapeId: shape.id, userId: this.username() } });
+        this.#wsService.sendMessage({ action: 'lock', data: { shapeId, userId: this.username() } });
         break;
       case 'stopResizing':
-        this.#wsService.sendMessage({ action: 'unlock', data: { shapeId: shape.id, userId: this.username() } });
+        this.#wsService.sendMessage({ action: 'unlock', data: { shapeId, userId: this.username() } });
         break;
 
       default:

@@ -20,13 +20,10 @@
         [width]="shape.width "
         [height]="shape.height "
         [lock]="!!(shape.lockedBy && shape.lockedBy !== username())"
-        [ngStyle]="{ 
-          top: shape.y + 'px',
-          left: shape.x + 'px',
-        }"
+        [cdkDragFreeDragPosition]="{x:shape.x,y:shape.y}"
         (cdkDragStarted)="onShapeDragStart(shape.id)"
         (cdkDragEnded)="onShapeDragEnd($event, shape.id)"
-        (cdkDragMoved)="onShapeDragMove($event, shape)"
+        (cdkDragMoved)="onShapeDragMove($event, shape.id)"
         >
         <div class="cursor-move" movement cdkDragHandle>
           <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
@@ -37,7 +34,7 @@
 
         <div 
         resizable 
-        (sizeChange)="resizingShape($event,shape)"  
+        (sizeChange)="resizingShape($event,shape.id)"  
         class="h-3 w-3 absolute bottom-0 right-0 bg-blue-500 cursor-nwse-resize"></div>
         </app-square>
       }

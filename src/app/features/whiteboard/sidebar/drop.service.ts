@@ -2,11 +2,11 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { inject, Injectable, signal } from '@angular/core';
 import { Shape } from '../../../core/models/shape.mpdel';
 import { generateUniqueId } from '../../../shared/utils/generator';
-import { WebsocketService } from '../../../core/services/websocket.service';
+import { WebSocketService } from '../../../core/services/websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class DropService {
-    readonly #wsService = inject(WebsocketService);
+    readonly #wsService = inject(WebSocketService);
     constructor(){
         this.checkForInitialState();
         this.checkForAddShape();

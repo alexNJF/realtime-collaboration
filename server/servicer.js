@@ -9,14 +9,15 @@ let locks = {};
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
-
+  
   ws.on('message', (message) => {
     const msg = JSON.parse(message);
     switch (msg.action) {
       case 'memberChange':
-          users.push(msg.data.userId);
-          ws['userId']=msg.data.userId
-          broadcastToAll({ action: 'memberChange', data: { users:users } });
+        users.push(msg.data.userId);
+        ws['userId']=msg.data.userId
+        console.log('Client join',msg.data.userId);
+        broadcastToAll({ action: 'memberChange', data: { users:users } });
         break;
       case 'lock':
         if (!locks[msg.data.shapeId]) {

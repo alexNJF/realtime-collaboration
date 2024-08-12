@@ -1,19 +1,22 @@
+import { TitleCasePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
-import { WebsocketService } from '../../../core/services/websocket.service';
+import { WebSocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-board-status',
   standalone: true,
-  imports: [],
+  imports: [TitleCasePipe],
   templateUrl: './board-status.component.html',
   styleUrl: './board-status.component.scss'
 })
 export class BoardStatusComponent {
-  readonly #wsService = inject(WebsocketService);
+  readonly #wsService = inject(WebSocketService);
+  retryStatus=this.#wsService.retryStatus;
   isConnected = input(false)
   username = input.required()
   members = input.required<string[]>()
-  resetServer(){
+  
+  resetServer():void{
     this.#wsService.sendMessage({action:'resetServer'})
   }
 }
