@@ -1,18 +1,16 @@
 import { CdkDrag, CdkDragEnd, CdkDragHandle, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
+import { ResizingModel } from '../../core/models/resizing.model';
 import { WebSocketService } from '../../core/services/websocket.service';
 import { ResizableDirective } from '../../shared/directives/resizable.directive';
 import { BoardStatusComponent } from './board-status/board-status.component';
 import { PointerComponent } from './pointer/pointer.component';
+import { WhiteboardService } from './services/whiteboard.service';
 import { DropService } from './sidebar/drop.service';
+import { RhombusComponent } from './sidebar/rhombus/rhombus.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SquareComponent } from './sidebar/square/square.component';
-import { TriangleComponent } from './sidebar/triangle/triangle.component';
-import { SocketAction } from '../../core/enums/socket-status.enum';
-import { ResizingStatus } from '../../core/enums/resizing-status.enum';
-import { WhiteboardService } from './services/whiteboard.service';
-import { ResizingModel } from '../../core/models/resizing.model';
 
 
 
@@ -28,7 +26,7 @@ import { ResizingModel } from '../../core/models/resizing.model';
     CdkDragHandle,
     SidebarComponent,
     SquareComponent,
-    TriangleComponent,
+    RhombusComponent,
     BoardStatusComponent,
     ResizableDirective,
     PointerComponent

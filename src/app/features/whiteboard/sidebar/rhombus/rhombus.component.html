@@ -1,0 +1,8 @@
+<div [ngClass]="{
+    'rotate-45':true,
+      'bg-gray-600': !lock(),  
+      'bg-rose-600': lock()  
+    }" [style.width]="width()+'px'" [style.height]="height()+'px'">
+    <ng-content select="[movement]"></ng-content>
+    <ng-content select="[resizable]"></ng-content>
+  </div>

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TriangleComponent } from './triangle.component';
+import { RhombusComponent } from './rhombus.component';
 
-describe('TriangleComponent', () => {
-  let component: TriangleComponent;
-  let fixture: ComponentFixture<TriangleComponent>;
+describe('RhombusComponent', () => {
+  let component: RhombusComponent;
+  let fixture: ComponentFixture<RhombusComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TriangleComponent]
+      imports: [RhombusComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TriangleComponent);
+    fixture = TestBed.createComponent(RhombusComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
