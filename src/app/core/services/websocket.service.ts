@@ -4,6 +4,8 @@ import { retry, switchMap } from 'rxjs/operators';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { WEB_SOCKET_URL } from '../configs/websocket.config';
 import { WebSocketDataModel } from '../models/socket.model';
+import { SocketAction } from '../enums/socket-status.enum';
+import { mergeWithPriority } from '../../shared/utils/array';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +16,8 @@ export class WebSocketService {
   private reconnectAttemptsCounter = signal(0);
   connectionStatus = signal<boolean>(false);
   private messagesSubject$ = new Subject<WebSocketDataModel>();
+  private offlineChanges: WebSocketDataModel[] = [];
+
 
   retryStatus = computed<string>(() => {
     const attempts = this.reconnectAttemptsCounter();
@@ -75,9 +79,28 @@ export class WebSocketService {
 
   private handleIncomingMessage(message: WebSocketDataModel): void {
     console.log('Received message:', message);
+    if (
+      message.action === SocketAction.INITIAL_STATE_UPDATE &&
+      this.offlineChanges.length > 0
+    ) {
+      this.syncOfflineChanges(message.data.shapes)
+    }
     this.connectionStatus.set(true);
     this.reconnectAttemptsCounter.set(0);
-    this.messagesSubject$.next(message); // Emit the message through the subject
+    this.messagesSubject$.next(message);
+  }
+
+  // resolve conflict by merging whit priory
+  syncOfflineChanges(data: any[]) {
+    if (this.connectionStatus()) {
+      const mergedResult = mergeWithPriority(data, this.offlineChanges, 'id')
+      while (mergedResult.length > 0) {
+        const change = mergedResult.shift();
+        if (change) {
+          this.sendMessage(change);
+        }
+      }
+    }
   }
 
   private handleConnectionError(error: any): void {
@@ -92,7 +115,14 @@ export class WebSocketService {
     if (this.connectionStatus()) {
       this.socket$.next(msg);
     } else {
-      console.error('WebSocket is not connected. Cannot send message.');
+      console.warn('Offline: Storing change for later sync');
+      // in offline mode we just save important data
+      if (
+        msg.action === SocketAction.ADD_SHAPE ||
+        msg.action === SocketAction.UPDATE_SHAPE
+      ) {
+        this.offlineChanges.push(msg);
+      }
     }
   }
 
