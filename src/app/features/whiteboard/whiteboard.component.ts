@@ -11,6 +11,7 @@ import { DropService } from './sidebar/drop.service';
 import { RhombusComponent } from './sidebar/rhombus/rhombus.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SquareComponent } from './sidebar/square/square.component';
+import { TextboxComponent } from './sidebar/textbox/textbox.component';
 
 
 
@@ -29,25 +30,25 @@ import { SquareComponent } from './sidebar/square/square.component';
     RhombusComponent,
     BoardStatusComponent,
     ResizableDirective,
-    PointerComponent
+    PointerComponent,
+    TextboxComponent
   ],
   providers: [WhiteboardService]
 })
 export default class WhiteboardComponent implements OnInit {
   username = input.required<string>()
   readonly shapes = inject(DropService).shapes;
-  readonly #wsService = inject(WebSocketService);
-  readonly #whiteboardService = inject(WhiteboardService);
-  readonly otherUserPointer = this.#whiteboardService.pointer;
-  readonly members = this.#whiteboardService.members;
+  private readonly whiteboardService = inject(WhiteboardService);
+  readonly otherUserPointer = this.whiteboardService.pointer;
+  readonly members = this.whiteboardService.members;
 
 
   ngOnInit() {
-    this.#whiteboardService.joinUser(this.username())
+    this.whiteboardService.joinUser(this.username())
   }
 
   onShapeDragStart(event: CdkDragStart, shapeId: string) {
-    this.#whiteboardService.shapeStartDragging(
+    this.whiteboardService.shapeStartDragging(
       event,
       shapeId,
       this.username()
@@ -55,7 +56,7 @@ export default class WhiteboardComponent implements OnInit {
   }
 
   onShapeDragEnd(event: CdkDragEnd<any>, shapeId: string) {
-    this.#whiteboardService.shapeStopDragging(
+    this.whiteboardService.shapeStopDragging(
       event,
       shapeId,
       this.username()
@@ -63,15 +64,15 @@ export default class WhiteboardComponent implements OnInit {
   }
 
   onShapeDragMove(event: CdkDragMove<any>, shapeId: string) {
-    this.#whiteboardService.shapeDragging(
+    this.whiteboardService.shapeDragging(
       event,
       shapeId,
       this.username()
     )
   }
-  
+
   resizingShape(event: ResizingModel, shapeId: string) {
-    this.#whiteboardService.handelResizing(
+    this.whiteboardService.handelResizing(
       event,
       shapeId,
       this.username()
@@ -79,7 +80,23 @@ export default class WhiteboardComponent implements OnInit {
   }
 
   mouseMove(event: MouseEvent) {
-    this.#whiteboardService.mouseMove(event, this.username())
+    this.whiteboardService.mouseMove(event, this.username())
+  }
+
+  shapeTextChange(event: string, shapeId: string) {
+    this.whiteboardService.handelTextChange(
+      event,
+      shapeId,
+      this.username()
+    )
+
+  }
+  shapeColorChange(event: string, shapeId: string) {
+    this.whiteboardService.handelColorChange(
+      event,
+      shapeId,
+      this.username()
+    )
   }
 
 }

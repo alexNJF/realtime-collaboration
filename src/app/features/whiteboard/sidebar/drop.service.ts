@@ -16,13 +16,15 @@ export class DropService {
     shapes = signal<Shape[]>([]);
    
     drop(event: CdkDragDrop<any>) {
-        const shape = {
+        const shape:Shape = {
             id: generateUniqueId(),
             type:event.item.element.nativeElement.attributes[1].name,
             x: event.dropPoint.x,
             y: event.dropPoint.y-64,// 64 id header height 
             width: 100,
-            height: 100
+            height: 100,
+            text:'',
+            color:'fff'
         }
         this.shapes.update((shapes)=>{
             shapes.push(shape)

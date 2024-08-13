@@ -2,6 +2,7 @@ import { TitleCasePipe } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { SocketAction } from '../../../core/enums/socket-status.enum';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-board-status',
@@ -11,14 +12,21 @@ import { SocketAction } from '../../../core/enums/socket-status.enum';
   styleUrl: './board-status.component.scss'
 })
 export class BoardStatusComponent {
-  readonly #wsService = inject(WebSocketService);
-  retryStatus=this.#wsService.retryStatus;
-  connectionStatus=this.#wsService.connectionStatus;
+  private readonly wsService = inject(WebSocketService);
+  retryStatus=this.wsService.retryStatus;
+  connectionStatus=this.wsService.connectionStatus;
   isConnected =signal(false)
   username = input.required()
   members = input.required<string[]>()
   
   resetServer():void{
-    this.#wsService.sendMessage({action:SocketAction.RESET_SERVER})
+    this.wsService.sendMessage({action:SocketAction.RESET_SERVER})
+  }
+  connect():void{
+    // this.wsService.initializeWebSocketConnection();
+  }
+
+  disconnect():void{
+    // this.wsService.disconnect()
   }
 }

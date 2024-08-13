@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { DropService } from '../sidebar/drop.service';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { SocketAction } from '../../../core/enums/socket-status.enum';
@@ -11,26 +11,28 @@ import { ResizingStatus } from '../../../core/enums/resizing-status.enum';
 
 @Injectable()
 export class WhiteboardService {
-    readonly shapes = inject(DropService).shapes;
-    readonly #wsService = inject(WebSocketService);
+    readonly shapes: WritableSignal<Shape[]> = inject(DropService).shapes;
+    private readonly wsService = inject(WebSocketService);
 
     pointer = signal<PointerPositionModel | undefined>(undefined);
     members = signal<string[]>([]);
 
     constructor() {
-        this.#wsService.messages$.subscribe(
+        this.wsService.messages$.subscribe(
             (msg) => this.handleIncomingMessage(msg)
         );
     }
 
     joinUser(username: string): void {
-        this.#wsService.sendMessage({
+        this.wsService.sendMessage({
             action: SocketAction.MEMBER_CHANGE,
             data: { userId: username }
         })
     }
 
     handleIncomingMessage(msg: WebSocketDataModel): void {
+        // console.log('message ali',msg);
+
         switch (msg.action) {
             case SocketAction.LOCK:
                 const shapeToLock = this.shapes().find((s) => s.id === msg.data.shapeId);
@@ -51,6 +53,8 @@ export class WhiteboardService {
                     shapeToUpdate.y = msg.data.y;
                     shapeToUpdate.width = msg.data.width;
                     shapeToUpdate.height = msg.data.height;
+                    shapeToUpdate.text = msg.data.text;
+                    shapeToUpdate.color = msg.data.color;
                 }
                 break;
             case SocketAction.MOUSE_MOVE:
@@ -63,7 +67,7 @@ export class WhiteboardService {
     }
 
     mouseMove(event: MouseEvent, username: string): void {
-        this.#wsService.sendMessage({
+        this.wsService.sendMessage({
             action: SocketAction.MOUSE_MOVE,
             data: {
                 userId: username,
@@ -75,7 +79,7 @@ export class WhiteboardService {
     shapeStartDragging(event: CdkDragStart, shapeId: string, username: string): void {
         const shape = this.findShapeById(shapeId);
         if (shape && !shape.lockedBy) {
-            this.#wsService.sendMessage({
+            this.wsService.sendMessage({
                 action: SocketAction.LOCK,
                 data: { shapeId, userId: username }
             });
@@ -88,12 +92,12 @@ export class WhiteboardService {
             const { x, y } = this.getDragPosition(event);
             shape.x = x;
             shape.y = y;
-            this.#wsService.sendMessage({
+            this.wsService.sendMessage({
                 action: SocketAction.UPDATE_SHAPE,
                 data: shape
             });
 
-            this.#wsService.sendMessage({
+            this.wsService.sendMessage({
                 action: SocketAction.UNLOCK,
                 data: { shapeId, userId: username }
             });
@@ -105,13 +109,13 @@ export class WhiteboardService {
         if (shape && shape.lockedBy === username) {
             const { x, y } = this.getDragPosition(event);
 
-            this.#wsService.sendMessage({
+            this.wsService.sendMessage({
                 action: SocketAction.UPDATE_SHAPE,
                 data: { ...shape, x, y }
             });
         }
     }
-    
+
     handelResizing(event: ResizingModel, shapeId: string, username: string): void {
         switch (event.status) {
             case ResizingStatus.RESIZING:
@@ -119,17 +123,35 @@ export class WhiteboardService {
                 if (shape) {
                     shape.width = event.width!,
                         shape.height = event.height!
-                    this.#wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+                    this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
                 }
                 break;
             case ResizingStatus.START_RESIZING:
-                this.#wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
+                this.wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
                 break;
             case ResizingStatus.STOP_RESIZING:
-                this.#wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
+                this.wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
                 break;
             default:
                 break;
+        }
+    }
+    handelTextChange(text: string, shapeId: string, username: string): void {
+        const shape = this.shapes().find((s) => s.id === shapeId);
+        if(shape){
+            this.wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
+            shape.text=text;
+            this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+            this.wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
+        }
+    }
+    handelColorChange(color: string, shapeId: string, username: string): void {
+        const shape = this.shapes().find((s) => s.id === shapeId);
+        if(shape){
+            this.wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
+            shape.color=color;
+            this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+            this.wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
         }
     }
 
