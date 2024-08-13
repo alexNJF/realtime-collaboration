@@ -14,10 +14,15 @@
         </div>
     </div>
     <div>
-        <input [formControl]="textControl" [ngStyle]="{
+        <input 
+        [formControl]="textControl" 
+        placeholder="Write Something"
+        class="border w-full p-2"
+        type="text"
+        [ngStyle]="{
             'background-color':colorControl.value,
             'height':height()-40+'px',
-        }" class="border w-full " type="text">
+        }" >
 
     </div>
     <ng-content select="[resizable]"></ng-content>

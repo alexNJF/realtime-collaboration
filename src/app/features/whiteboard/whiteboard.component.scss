@@ -1,16 +1,13 @@
+.shape.locked {
+  background-color: #e74c3c;
+  border-color: #c0392b;
+  cursor: not-allowed;
+}
 
-  
-  .shape.locked {
-    background-color: #e74c3c;
-    border-color: #c0392b;
-    cursor: not-allowed;
-  }
-  
-  .board {
-    width: 100%;
-    height: 600px;
-    max-width: 100%;
-    border: dotted #ccc 2px;
-    background-color: #efefef;
-  }
-  
+.board {
+  width: 100%;
+  height:  calc(100vh - 73px);
+  max-width: 100%;
+  border: dotted #ccc 2px;
+  background-color: #efefef;
+}
