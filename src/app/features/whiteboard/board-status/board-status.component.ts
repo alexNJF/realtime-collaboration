@@ -23,10 +23,16 @@ export class BoardStatusComponent {
     this.wsService.sendMessage({action:SocketAction.RESET_SERVER})
   }
   connect():void{
-    // this.wsService.initializeWebSocketConnection();
+    this.wsService.connect();
+    
+    this.wsService.sendMessage({
+        action: SocketAction.MEMBER_CHANGE,
+        data: { userId: this.username() }
+    })
+
   }
 
   disconnect():void{
-    // this.wsService.disconnect()
+    this.wsService.disconnect()
   }
 }

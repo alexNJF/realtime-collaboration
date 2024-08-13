@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Observable, timer } from 'rxjs';
-import { retry } from 'rxjs/operators';
+import { Observable, Subject, timer } from 'rxjs';
+import { retry, switchMap } from 'rxjs/operators';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { WEB_SOCKET_URL } from '../configs/websocket.config';
 import { WebSocketDataModel } from '../models/socket.model';
@@ -13,6 +13,7 @@ export class WebSocketService {
   private readonly maxReconnectAttempts = 5;
   private reconnectAttemptsCounter = signal(0);
   connectionStatus = signal<boolean>(false);
+  private messagesSubject$ = new Subject<WebSocketDataModel>();
 
   retryStatus = computed<string>(() => {
     const attempts = this.reconnectAttemptsCounter();
@@ -22,10 +23,15 @@ export class WebSocketService {
   });
 
   constructor() {
-    this.initializeWebSocketConnection();
+    this.connect()
   }
 
-  private initializeWebSocketConnection(): void {
+  connect(): void {
+    if (this.connectionStatus()) {
+      console.warn('WebSocket is already connected.');
+      return;
+    }
+
     this.socket$ = webSocket<WebSocketDataModel>(WEB_SOCKET_URL);
 
     this.socket$
@@ -40,16 +46,27 @@ export class WebSocketService {
         error: (error) => this.handleConnectionError(error),
         complete: () => this.handleConnectionComplete(),
       });
+
+    this.connectionStatus.set(true);
   }
 
+  disconnect(): void {
+    if (!this.connectionStatus()) {
+      console.warn('WebSocket is not connected.');
+      return;
+    }
+
+    this.socket$.complete();
+    this.connectionStatus.set(false);
+    console.log('WebSocket connection manually closed');
+  }
 
   private handleRetry(error: any, retryCount: number): Observable<number> {
     this.reconnectAttemptsCounter.update((count) => count + 1);
-    this.connectionStatus.set(false)
-    
+    this.connectionStatus.set(false);
+
     if (this.reconnectAttemptsCounter() >= this.maxReconnectAttempts) {
       console.error('Maximum reconnect attempts reached');
-      this.connectionStatus.set(false)
       throw error; // Stop retrying after max attempts
     }
 
@@ -57,8 +74,10 @@ export class WebSocketService {
   }
 
   private handleIncomingMessage(message: WebSocketDataModel): void {
-    this.connectionStatus.set(true)
+    console.log('Received message:', message);
+    this.connectionStatus.set(true);
     this.reconnectAttemptsCounter.set(0);
+    this.messagesSubject$.next(message); // Emit the message through the subject
   }
 
   private handleConnectionError(error: any): void {
@@ -70,11 +89,14 @@ export class WebSocketService {
   }
 
   sendMessage(msg: WebSocketDataModel): void {
-    this.socket$.next(msg);
+    if (this.connectionStatus()) {
+      this.socket$.next(msg);
+    } else {
+      console.error('WebSocket is not connected. Cannot send message.');
+    }
   }
 
   get messages$(): Observable<WebSocketDataModel> {
-    return this.socket$.asObservable();
+    return this.messagesSubject$.asObservable();
   }
-
 }
