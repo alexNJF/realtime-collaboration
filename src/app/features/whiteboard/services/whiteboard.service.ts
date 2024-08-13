@@ -47,14 +47,12 @@ export class WhiteboardService {
                 }
                 break;
             case SocketAction.UPDATE_SHAPE:
-                const shapeToUpdate = this.shapes().find((s) => s.id === msg.data.id);
+
+                const shapeToUpdate = this.shapes().find((s) => s.id === msg.data.shapeId);
                 if (shapeToUpdate) {
-                    shapeToUpdate.x = msg.data.x;
-                    shapeToUpdate.y = msg.data.y;
-                    shapeToUpdate.width = msg.data.width;
-                    shapeToUpdate.height = msg.data.height;
-                    shapeToUpdate.text = msg.data.text;
-                    shapeToUpdate.color = msg.data.color;
+                    Object.keys(msg.data.changes).forEach((key) => {
+                        shapeToUpdate[key as keyof Shape] = msg.data.changes[key] as never
+                    })
                 }
                 break;
             case SocketAction.MOUSE_MOVE:
@@ -108,10 +106,9 @@ export class WhiteboardService {
         const shape = this.findShapeById(shapeId);
         if (shape && shape.lockedBy === username) {
             const { x, y } = this.getDragPosition(event);
-
             this.wsService.sendMessage({
                 action: SocketAction.UPDATE_SHAPE,
-                data: { ...shape, x, y }
+                data: { shapeId, changes: { x, y } }
             });
         }
     }
@@ -121,9 +118,12 @@ export class WhiteboardService {
             case ResizingStatus.RESIZING:
                 const shape = this.shapes().find((s) => s.id === shapeId);
                 if (shape) {
-                    shape.width = event.width!,
-                        shape.height = event.height!
-                    this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+                    shape.width = event.width!;
+                    shape.height = event.height!;
+                    this.wsService.sendMessage({
+                        action: SocketAction.UPDATE_SHAPE,
+                        data: { shapeId, changes: { width: event.width, height: event.height } }
+                    });
                 }
                 break;
             case ResizingStatus.START_RESIZING:
@@ -138,23 +138,28 @@ export class WhiteboardService {
     }
     handelTextChange(text: string, shapeId: string, username: string): void {
         const shape = this.shapes().find((s) => s.id === shapeId);
-        if(shape){
+        if (shape) {
             this.wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
-            shape.text=text;
-            this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+            shape.text = text;
+            this.wsService.sendMessage({
+                action: SocketAction.UPDATE_SHAPE,
+                data: { shapeId, changes: { text } }
+            });
             this.wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
         }
     }
     handelColorChange(color: string, shapeId: string, username: string): void {
         const shape = this.shapes().find((s) => s.id === shapeId);
-        if(shape){
+        if (shape) {
             this.wsService.sendMessage({ action: SocketAction.LOCK, data: { shapeId, userId: username } });
-            shape.color=color;
-            this.wsService.sendMessage({ action: SocketAction.UPDATE_SHAPE, data: shape });
+            shape.color = color;
+            this.wsService.sendMessage({
+                action: SocketAction.UPDATE_SHAPE,
+                data: { shapeId, changes: { color } }
+            });
             this.wsService.sendMessage({ action: SocketAction.UNLOCK, data: { shapeId, userId: username } });
         }
     }
-
 
     // A utility function to find a shape by its ID
     private findShapeById(shapeId: string): Shape | undefined {

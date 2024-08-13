@@ -33,9 +33,12 @@ wss.on('connection', (ws) => {
         break;
 
       case 'updateShape':
-        const shapeIndex = shapes.findIndex((s) => s.id === msg.data.id);
+        const shapeIndex = shapes.findIndex((s) => s.id === msg.data.shapeId);
         if (shapeIndex !== -1) {
-          shapes[shapeIndex] = msg.data;
+          shapes[shapeIndex] ={
+            ...shapes[shapeIndex],
+            ...msg.data.changes
+          };
           broadcastToOther({ action: 'updateShape', data: msg.data },ws);
         }
         break;
