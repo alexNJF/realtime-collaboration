@@ -19,7 +19,7 @@ export default class AuthenticationComponent {
   submit(){
     if(this.form.valid){
       //save curent username on services 
-      this.#router.navigate(['designer',this.form.value.username])
+      this.#router.navigate(['whiteboard',this.form.value.username])
     }
   }
 }

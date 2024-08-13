@@ -69,6 +69,7 @@ export default class WhiteboardComponent implements OnInit {
       this.username()
     )
   }
+  
   resizingShape(event: ResizingModel, shapeId: string) {
     this.#whiteboardService.handelResizing(
       event,
@@ -76,6 +77,7 @@ export default class WhiteboardComponent implements OnInit {
       this.username()
     )
   }
+
   mouseMove(event: MouseEvent) {
     this.#whiteboardService.mouseMove(event, this.username())
   }

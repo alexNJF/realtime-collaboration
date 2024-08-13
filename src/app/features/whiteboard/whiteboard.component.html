@@ -9,10 +9,11 @@
  [pointer]="otherUserPointer()"
  />
 
-  @for (shape of shapes(); track $index) {
+  @for (shape of shapes(); track index;let index = $index) {
     @switch (shape.type) {
       @case ('square') {
         <app-square 
+        [id]="'square-'+index"
         class="absolute"
         cdkDragBoundary=".board"
         cdkDrag
@@ -39,6 +40,7 @@
       }
       @case ('rhombus') {
         <app-rhombus 
+        [id]="'rhombus-'+index"
         class="absolute"
         cdkDragBoundary=".board"
         cdkDrag

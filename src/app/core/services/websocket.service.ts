@@ -12,9 +12,9 @@ export class WebSocketService {
   private socket$!: WebSocketSubject<WebSocketDataModel>;
   private readonly maxReconnectAttempts = 5;
   private reconnectAttemptsCounter = signal(0);
-  connectionStatus = signal(false);
+  connectionStatus = signal<boolean>(false);
 
-  retryStatus = computed(() => {
+  retryStatus = computed<string>(() => {
     const attempts = this.reconnectAttemptsCounter();
     return attempts >= this.maxReconnectAttempts
       ? 'Maximum reconnect attempts reached (Please Refresh the Page for Reconnecting)'
@@ -45,13 +45,10 @@ export class WebSocketService {
 
   private handleRetry(error: any, retryCount: number): Observable<number> {
     this.reconnectAttemptsCounter.update((count) => count + 1);
-    console.log(`Reconnecting... (${this.reconnectAttemptsCounter()})`);
-    // this.connectionStatusSubject.next(false);
     this.connectionStatus.set(false)
     
     if (this.reconnectAttemptsCounter() >= this.maxReconnectAttempts) {
       console.error('Maximum reconnect attempts reached');
-      // this.connectionStatusSubject.next(false);
       this.connectionStatus.set(false)
       throw error; // Stop retrying after max attempts
     }

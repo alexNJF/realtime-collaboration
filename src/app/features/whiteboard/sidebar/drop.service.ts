@@ -20,7 +20,7 @@ export class DropService {
             id: generateUniqueId(),
             type:event.item.element.nativeElement.attributes[1].name,
             x: event.dropPoint.x,
-            y: event.dropPoint.y,
+            y: event.dropPoint.y-64,// 64 id header height 
             width: 100,
             height: 100
         }
