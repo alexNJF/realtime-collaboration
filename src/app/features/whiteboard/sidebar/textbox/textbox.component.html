@@ -1,25 +1,24 @@
-<div [ngClass]="{
-    'p-2':true,
-    'bg-gray-600': !lock(),  
-    'bg-rose-600': lock()  
-  }">
-    <ng-content select="[movement]"></ng-content>
-    <div class="absolute top-2 right-2 ">
-        <input class="h-5 w-5 border rounded-full" [formControl]="colorControl" type="color">
+<div [ngStyle]="{
+    'width':width()+'px',
+    'height':height()+'px',
+    }">
+    <div [ngClass]="{
+        'p-2':true,
+        'h-[40px]':true,
+        'bg-gray-600': !lock(),  
+        'bg-rose-600': lock()  
+    }">
+        <ng-content select="[movement]"></ng-content>
+        <div class="absolute top-2 right-2 ">
+            <input class="h-5 w-5 border rounded-full" [formControl]="colorControl" type="color">
+        </div>
     </div>
-</div>
-<div>
-    <div class="w-100 relative">
-        <input
-         [formControl]="textControl" 
-         [ngStyle]="{
-            'width':width()+'px',
-            'height':height()+'px',
-            'background-color':colorControl.value
-        }" 
-        class="border "
-        type="text">
-    </div>
+    <div>
+        <input [formControl]="textControl" [ngStyle]="{
+            'background-color':colorControl.value,
+            'height':height()-40+'px',
+        }" class="border w-full " type="text">
 
+    </div>
     <ng-content select="[resizable]"></ng-content>
 </div>
