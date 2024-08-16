@@ -1,5 +1,5 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { SocketAction } from '../../../core/enums/socket-status.enum';
 import { Router } from '@angular/router';
@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [TitleCasePipe],
   templateUrl: './board-status.component.html',
-  styleUrl: './board-status.component.scss'
+  styleUrl: './board-status.component.scss',
+  changeDetection:ChangeDetectionStrategy.OnPush
 })
 export class BoardStatusComponent {
   private readonly wsService = inject(WebSocketService);

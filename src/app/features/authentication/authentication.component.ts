@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './authentication.component.html',
-  styleUrl: './authentication.component.scss'
+  styleUrl: './authentication.component.scss',
+  changeDetection:ChangeDetectionStrategy.OnPush
 })
 export default class AuthenticationComponent {
   readonly #fb = inject(FormBuilder);
@@ -18,7 +19,6 @@ export default class AuthenticationComponent {
 
   submit(){
     if(this.form.valid){
-      //save curent username on services 
       this.#router.navigate(['whiteboard',this.form.value.username])
     }
   }

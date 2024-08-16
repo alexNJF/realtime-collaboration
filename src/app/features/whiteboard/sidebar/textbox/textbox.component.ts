@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, Input, input, OnInit, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, Input, input, OnInit, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
@@ -9,7 +9,8 @@ import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './textbox.component.html',
-  styleUrl: './textbox.component.scss'
+  styleUrl: './textbox.component.scss',
+  changeDetection:ChangeDetectionStrategy.OnPush
 })
 export class TextboxComponent implements OnInit {
   private destroyRef = inject(DestroyRef);

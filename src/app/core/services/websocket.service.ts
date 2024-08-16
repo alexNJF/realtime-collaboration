@@ -30,6 +30,15 @@ export class WebSocketService {
     this.connect()
   }
 
+  /**
+   * Establishes a WebSocket connection to the specified URL.
+   *
+   * If the connection is already established, it logs a warning and returns.
+   * Otherwise, it sets up a retry mechanism with a specified number of attempts
+   * and delay between attempts. Once connected, it sets the connection status to true.
+   *
+   * @return {void}
+   */
   connect(): void {
     if (this.connectionStatus()) {
       console.warn('WebSocket is already connected.');
@@ -65,6 +74,13 @@ export class WebSocketService {
     console.log('WebSocket connection manually closed');
   }
 
+  /**
+   * Handles the retry logic for WebSocket connection attempts.
+   *
+   * @param {any} error - The error that occurred during the connection attempt.
+   * @param {number} retryCount - The current number of retry attempts.
+   * @return {Observable<number>} An Observable that delays the next retry attempt.
+   */
   private handleRetry(error: any, retryCount: number): Observable<number> {
     this.reconnectAttemptsCounter.update((count) => count + 1);
     this.connectionStatus.set(false);
@@ -77,6 +93,12 @@ export class WebSocketService {
     return timer(1000 * retryCount); // Use timer to return an Observable
   }
 
+  /**
+   * Handles incoming WebSocket messages.
+   *
+   * @param {WebSocketDataModel} message - The WebSocket message received.
+   * @return {void} This function does not return anything.
+   */
   private handleIncomingMessage(message: WebSocketDataModel): void {
     console.log('Received message:', message);
     if (
@@ -90,7 +112,13 @@ export class WebSocketService {
     this.messagesSubject$.next(message);
   }
 
-  // resolve conflict by merging whit priory
+  
+  /**
+   * Resolves conflicts by merging offline changes with the provided data, prioritizing by 'id'.
+   *
+   * @param {any[]} data - The data to merge with offline changes.
+   * @return {void} This function does not return a value.
+   */
   syncOfflineChanges(data: any[]) {
     if (this.connectionStatus()) {
       const mergedResult = mergeWithPriority(data, this.offlineChanges, 'id')
@@ -111,6 +139,13 @@ export class WebSocketService {
     console.log('WebSocket connection closed');
   }
 
+  /**
+   * Sends a WebSocket message to the server if the connection is active, 
+   * otherwise stores the message for later synchronization.
+   *
+   * @param {WebSocketDataModel} msg - The message to be sent to the server.
+   * @return {void} This function does not return a value.
+   */
   sendMessage(msg: WebSocketDataModel): void {
     if (this.connectionStatus()) {
       this.socket$.next(msg);
@@ -126,6 +161,11 @@ export class WebSocketService {
     }
   }
 
+  /**
+   * Retrieves the observable stream of WebSocket messages.
+   *
+   * @return {Observable<WebSocketDataModel>} The observable stream of WebSocket messages.
+   */
   get messages$(): Observable<WebSocketDataModel> {
     return this.messagesSubject$.asObservable();
   }

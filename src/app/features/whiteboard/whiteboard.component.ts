@@ -1,6 +1,6 @@
 import { CdkDrag, CdkDragEnd, CdkDragHandle, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit } from '@angular/core';
 import { ResizingModel } from '../../core/models/resizing.model';
 import { WebSocketService } from '../../core/services/websocket.service';
 import { ResizableDirective } from '../../shared/directives/resizable.directive';
@@ -33,7 +33,7 @@ import { TextboxComponent } from './sidebar/textbox/textbox.component';
     PointerComponent,
     TextboxComponent
   ],
-  providers: [WhiteboardService]
+  providers: [WhiteboardService],
 })
 export default class WhiteboardComponent implements OnInit {
   username = input.required<string>()

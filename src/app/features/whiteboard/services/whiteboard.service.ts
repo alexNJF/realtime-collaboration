@@ -1,4 +1,4 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { DropService } from '../sidebar/drop.service';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { SocketAction } from '../../../core/enums/socket-status.enum';
@@ -8,19 +8,24 @@ import { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { Shape } from '../../../core/models/shape.mpdel';
 import { ResizingModel } from '../../../core/models/resizing.model';
 import { ResizingStatus } from '../../../core/enums/resizing-status.enum';
+import { tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable()
 export class WhiteboardService {
     readonly shapes: WritableSignal<Shape[]> = inject(DropService).shapes;
     private readonly wsService = inject(WebSocketService);
+    private destroyRef = inject(DestroyRef);
+
 
     pointer = signal<PointerPositionModel | undefined>(undefined);
     members = signal<string[]>([]);
 
     constructor() {
-        this.wsService.messages$.subscribe(
-            (msg) => this.handleIncomingMessage(msg)
-        );
+        this.wsService.messages$.pipe(
+            tap((msg) => this.handleIncomingMessage(msg)),
+            takeUntilDestroyed(this.destroyRef),
+        ).subscribe()
     }
 
     joinUser(username: string): void {
