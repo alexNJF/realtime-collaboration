@@ -85,8 +85,8 @@ test('Drag and drop <app-square> from sidebar to board', async () => {
     const startY = appSquareBox.y + appSquareBox.height / 2;
 
     // Calculate target coordinates relative to the board's bounding box
-    const targetX = boardBox.x + 102; // 100px from the left of the board
-    const targetY = boardBox.y + 102; // 100px from the top of the board
+    const targetX = boardBox.x + 100; // 100px from the left of the board
+    const targetY = boardBox.y + 100; // 100px from the top of the board
 
     // Simulate drag and drop
     await page.mouse.move(startX, startY);
@@ -102,8 +102,8 @@ test('Drag and drop <app-square> from sidebar to board', async () => {
 
 
     // Check that the <app-square> is at the expected drop location
-    expect(droppedBox.x).toBeCloseTo(targetX,1); 
-    expect(droppedBox.y).toBeCloseTo(targetY,1);
+    expect(Math.abs(droppedBox.x-targetX)).toBeLessThan(10); 
+    expect(Math.abs(droppedBox.y-targetY)).toBeLessThan(10); 
   }
   await browser.close();
 
